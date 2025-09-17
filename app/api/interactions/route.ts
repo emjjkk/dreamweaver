@@ -24,11 +24,11 @@ export async function POST(req: NextRequest) {
 
     // Just in case your interaction endpoint isn't getting verified and need to do serious debugging
     
-    // console.log('[Discord] Signature:', signature)
-    // console.log('[Discord] Timestamp:', timestamp)
-    // console.log('[Discord] Raw body:', rawBody)
-    // console.log('[Discord] Public key:', PUBLIC_KEY)
-    // console.log('[Discord] Valid:', isValid)
+     console.log('[Discord] Signature:', signature)
+     console.log('[Discord] Timestamp:', timestamp)
+     console.log('[Discord] Raw body:', rawBody)
+     console.log('[Discord] Public key:', PUBLIC_KEY)
+     console.log('[Discord] Valid:', isValid)
 
     const interaction = JSON.parse(rawBody)
 

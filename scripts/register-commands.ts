@@ -12,7 +12,7 @@ function ask(question: string): Promise<string> {
     rl.question(question, (answer) => resolve(answer.trim()))
   })
 }
- 
+
 async function main() {
   try {
     const DISCORD_TOKEN = await ask('Enter your Discord Bot Token: ')
@@ -28,8 +28,32 @@ async function main() {
     const commands = [
       {
         name: 'ping',
-        description: 'Replies with Pong!',
+        description: 'Check if Dreamweaver is awake and well.',
       },
+      {
+        name: 'dream_video',
+        description: 'Generate a video from text prompt.',
+        options: [
+          {
+            "name": "prompt",
+            "description": "Describe what you imagine",
+            "type": 3,
+            "required": true
+          }
+        ]
+      },
+      {
+        name: 'dream_image',
+        description: 'Generate an image from text prompt.',
+        options: [
+          {
+            "name": "prompt",
+            "description": "Describe what you imagine",
+            "type": 3,
+            "required": true
+          }
+        ]
+      }
     ]
 
     // [Don't edit code below this line]
