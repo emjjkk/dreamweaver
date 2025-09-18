@@ -61,6 +61,7 @@ Official Discord: https://discord.gg/xTQ4WRNqyJ
 - **Image Generation**: Qwen-Image AI Model
 - **Framework**: Next.js TypeScript
 - **Database**: Supabase
+- **Inference Providers**: fal.ai, Replicate
 - **API**: Discord.js v14
 - **Runtime**: Node.js
 - **Language**: TypeScript
