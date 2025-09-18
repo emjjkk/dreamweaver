@@ -1,29 +1,37 @@
 'use client'
 import { useEffect, useState } from 'react'
-
-// Import content
-import Example from '@/components/Example'
-import Development from '@/components/Development'
+import { FaDiscord, FaGithub } from 'react-icons/fa6'
 
 export default function Index() {
-  // When you're in development mode, these lines will create the invite link of YOUR discord bot,
-  // According to the credentials you provided in .env.local
   const clientId = process.env.NEXT_PUBLIC_DISCORD_APPLICATION_ID
   const permissions = 8 // Admin
   let inviteUrl = ''
   if (clientId && permissions) inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=bot%20applications.commands`
-  
-  // This is just to see whether you're actually working on the bot or just viewing the template's homepage
-  // You can remove this when you don't need it anymore
-  const [isDevelopment, setIsDevelopment] = useState<boolean | null>(null)
-  useEffect(() => {
-    const prodDomain = 'nextjs-discordbot-template.vercel.app'
-    const currentDomain = window.location.hostname
-    setIsDevelopment(currentDomain !== prodDomain)
-  }, [])
-  if (isDevelopment === null) return null
 
-  // And then we conditionally render page content accordingly to the test above, with steps to help you get started.
-  // Feel free to remove this also and start afresh to build the web homepage of your own bot.
-  return (<>{isDevelopment ? (<Development inviteUrl={inviteUrl}/>) : (<Example inviteUrl={inviteUrl}/>)}</>)
+  return (
+    <>
+      <div className="w-screen flex items-center text-white">
+        <div className="w-1/2 h-screen bg-black p-12 relative">
+          <div className="flex items-center gap-2 mb-5">
+            <img src="/download.jfif" alt="Dreamweaver" className='rounded-full w-8 h-auto' />
+            <h1 className="text-xl">Dreamweaver</h1>
+            <button className="px-2 py-1 text-sm bg-blue-500 rounded-md">Beta</button>
+          </div>
+          <h1 className="text-5xl/[1.2] mb-8">Near-perfect AI-generated images and artwork. Instantly. Open-Source. On <span className='text-blue-500'>Discord</span>.</h1>
+          <div className="flex items-center gap-2">
+            <a href={inviteUrl}><button className="px-4 py-2 text-md flex items-center gap-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 hover:cursor-pointer transition-2"><FaDiscord/> Use on Discord</button></a>
+            <a href="https://github.com/emjjkk/dreamweaver"><button className="px-4 py-2 text-md flex items-center gap-2 bg-white text-black rounded-md hover:bg-slate-200 hover:cursor-pointer transition-2"><FaGithub/> Contribute on Github</button></a>
+          </div>
+          <div className="absolute bottom-12 left-12 text-md">Built with 🔥 by @emjjkk</div>
+        </div>
+        <div className="w-1/2 h-screen grid grid-cols-2 grid-rows-2">
+          <div className="bg-cover bg-center bg-[url('/4.webp')]"></div>
+          <div className="bg-cover bg-center bg-[url('/2.webp')]"></div>
+          <div className="bg-cover bg-center bg-[url('/1.webp')]"></div>
+          <div className="bg-cover bg-center bg-[url('/3.webp')]"></div>
+        </div>
+      </div>
+
+    </>
+  )
 }

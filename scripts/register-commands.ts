@@ -31,8 +31,12 @@ async function main() {
         description: 'Check if Dreamweaver is awake and well.',
       },
       {
+        name: 'info',
+        description: 'Info about the things that keep Dreamweaver running',
+      },
+      {
         name: 'dream',
-        description: 'Generate a video from text prompt.',
+        description: 'Generate a image from text prompt.',
         options: [
           {
             "name": "prompt",

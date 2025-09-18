@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Lexend } from "next/font/google";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -8,11 +8,11 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Discord Bot Starter Template",
-  description: "The fastest way to build Discord bots with Next.js and Supabase",
+  title: "Dreamweaver - dream anything",
+  description: "AI image generation bot for discord",
 };
 
-const geistSans = Geist({
+const geistSans = Lexend({
   variable: "--font-geist-sans",
   display: "swap",
   subsets: ["latin"],

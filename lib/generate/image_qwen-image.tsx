@@ -27,7 +27,7 @@ export async function generate(prompt: string, user_id: string, style?: string) 
         throw new Error('HF_TOKEN must start with "hf_"')
     }
 
-    const client = new InferenceClient(process.env.HF_TOKEN_2);
+    const client = new InferenceClient(process.env.HF_TOKEN);
 
     try {
         // Build enhanced prompt with style
