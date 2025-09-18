@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react'
 import { FaDiscord, FaGithub } from 'react-icons/fa6'
 
+export const runtime = 'edge';
+
 export default function Index() {
   const clientId = process.env.NEXT_PUBLIC_DISCORD_APPLICATION_ID
   const permissions = 8 // Admin
