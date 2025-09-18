@@ -1,6 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-
-const supabase = createClient()
+import { supabase } from '@/lib/supabase/bot'
 
 export async function checkUser(discordId: string , type:string) {
   try {
