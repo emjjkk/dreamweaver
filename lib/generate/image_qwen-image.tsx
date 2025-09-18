@@ -28,7 +28,10 @@ export async function generate(prompt: string, user_id: string, style?: string) 
     }
 
     // const client = new InferenceClient(process.env.HF_TOKEN);
-    const client = new InferenceClient(process.env.HF_TOKEN, { provider: "huggingface" });
+    const client = new InferenceClient(process.env.HF_TOKEN, {
+  endpointUrl: "https://api-inference.huggingface.co/models/Qwen/Qwen-Image"
+});
+
 
     try {
         // Build enhanced prompt with style
