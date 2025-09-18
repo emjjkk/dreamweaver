@@ -31,7 +31,7 @@ async function main() {
         description: 'Check if Dreamweaver is awake and well.',
       },
       {
-        name: 'dream_video',
+        name: 'dream',
         description: 'Generate a video from text prompt.',
         options: [
           {
@@ -39,21 +39,26 @@ async function main() {
             "description": "Describe what you imagine",
             "type": 3,
             "required": true
+          },
+          {
+            "name": "style",
+            "description": "Choose the art style for your video",
+            "type": 3,
+            "required": false,
+            "choices": [
+              {"name": "Hyperrealistic", "value": "hyperrealistic"},
+              {"name": "Pop Art", "value": "pop_art"},
+              {"name": "Digital Art", "value": "digital_art"},
+              {"name": "Anime", "value": "anime"},
+              {"name": "Pixel Art", "value": "pixel_art"},
+              {"name": "Paper Craft","value": "paper_craft"},
+              {"name": "Watercolor", "value": "watercolor"},
+              {"name": "Pencil Drawing","value": "pencil_drawing"},
+              {"name": "Renaissance", "value": "renaissance"}
+            ]
           }
         ]
       },
-      {
-        name: 'dream_image',
-        description: 'Generate an image from text prompt.',
-        options: [
-          {
-            "name": "prompt",
-            "description": "Describe what you imagine",
-            "type": 3,
-            "required": true
-          }
-        ]
-      }
     ]
 
     // [Don't edit code below this line]

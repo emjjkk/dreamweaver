@@ -3,8 +3,8 @@ import { InferenceClient } from "@huggingface/inference";
 
 export async function generate(prompt: string, user_id: string) {
     // Debug environment variables (same as image generation)
-    console.log('[DEBUG] Video - HF_TOKEN exists:', !!process.env.HF_TOKEN)
-    console.log('[DEBUG] Video - HF_TOKEN length:', process.env.HF_TOKEN?.length)
+    console.log('[DEBUG] Video - HF_TOKEN exists:', !!process.env.HF_TOKEN_2)
+    console.log('[DEBUG] Video - HF_TOKEN length:', process.env.HF_TOKEN_2?.length)
     
     if (!process.env.HF_TOKEN) {
         throw new Error('HF_TOKEN environment variable is not set')
@@ -14,7 +14,7 @@ export async function generate(prompt: string, user_id: string) {
         throw new Error('HF_TOKEN must start with "hf_"')
     }
 
-    const client = new InferenceClient(process.env.HF_TOKEN);
+    const client = new InferenceClient(process.env.HF_TOKEN_2);
 
     try {
         console.log('[status] Starting video generation with prompt:', prompt)
@@ -23,7 +23,7 @@ export async function generate(prompt: string, user_id: string) {
         const videoBlob = await client.textToVideo({
             provider: "auto",
             model: "Wan-AI/Wan2.2-T2V-A14B",
-            inputs: prompt,
+            inputs: `Ultra HD, 4K, cinematic composition. ${prompt}`,
         });
         
         console.log('[status] Video generated! Type:', typeof videoBlob)

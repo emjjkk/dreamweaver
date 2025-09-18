@@ -1,5 +1,6 @@
 import { generate as generateImage } from '@/lib/generate/image_qwen-image'
 import { generate as generateVideo } from '@/lib/generate/video_wan2-2'
+import { supabase } from '@/lib/supabase/bot'
 import type {
   APIChatInputApplicationCommandInteraction,
   APIApplicationCommandInteractionDataStringOption
@@ -17,7 +18,6 @@ function getStringOption(
   return opt?.value
 }
 
-const BOT_TOKEN = process.env.NEXT_PUBLIC_DISCORD_TOKEN
 const APP_ID = process.env.NEXT_PUBLIC_DISCORD_APPLICATION_ID
 
 export async function handleCommand(interaction: APIChatInputApplicationCommandInteraction) {
@@ -37,10 +37,12 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
     )
   }
 
-  if (name === 'dream_image') {
+  if (name === 'dream') {
     const prompt = getStringOption(interaction.data.options, 'prompt')
-    console.log('[status] Command received...', { prompt, userId })
+    const style = getStringOption(interaction.data.options, 'style')
     
+    console.log('[status] Command received...', { prompt, style, userId })
+
     // Return deferred response immediately
     const deferResponse = new Response(
       JSON.stringify({ type: 5 }), // DEFERRED_RESPONSE
@@ -51,20 +53,25 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
     Promise.resolve().then(async () => {
       try {
         console.log('[status] Starting image generation...')
-        
+
         if (!prompt) {
           throw new Error('No prompt provided')
         }
-        
-        console.log('[status] Calling generateImage function...')
-        const result = await generateImage(prompt, userId)
+
+        console.log('[status] Calling generateImage function with style:', style)
+        const result = await generateImage(prompt, userId, style)
         console.log('[status] Image generated successfully:', result)
         console.log('[DEBUG] APP_ID:', APP_ID)
         console.log('[DEBUG] interactionToken length:', interactionToken.length)
-        
+
         // Try using the /messages/@original endpoint for deferred responses
         const webhookUrl = `https://discord.com/api/v10/webhooks/${APP_ID}/${interactionToken}/messages/@original`
         console.log('[DEBUG] Webhook URL:', webhookUrl)
+
+        // Create embed title with style info
+        const embedTitle = style 
+          ? `Here's your ${style.replace('_', ' ')} style image: ${prompt}`
+          : `Here's your image: ${prompt}`
 
         const webhookResponse = await fetch(webhookUrl, {
           method: 'PATCH',
@@ -75,22 +82,23 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
             content: `<@${userId}> Your image is ready!`,
             embeds: [
               {
-                title: `Here's your image: ${prompt}`,
+                title: embedTitle,
                 image: { url: result },
-                color: 0x00ff00,
+                color: 0xff0000,
+                footer: style ? { text: `Style: ${style.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}` } : undefined,
               },
             ],
           }),
         })
-        
+
         console.log('[status] Discord webhook response status:', webhookResponse.status)
-        
+
         if (!webhookResponse.ok) {
           const errorText = await webhookResponse.text()
           console.error('[ERROR] Discord webhook failed:', errorText)
           throw new Error(`Discord webhook failed: ${webhookResponse.status} - ${errorText}`)
         }
-        
+
         console.log('[status] Discord message sent successfully')
       } catch (err) {
         console.error('[ERROR] Image generation failed:', err)
@@ -107,7 +115,8 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
     return deferResponse
   }
 
-  if (name === 'dream_video') {
+  {/* 
+    if (name === 'dream_video') {
     const prompt = getStringOption(interaction.data.options, 'prompt')
     console.log('[status] Video command received...', { prompt, userId })
 
@@ -139,12 +148,12 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            content: `<@${userId}> Your Video is ready! ${result}`,
+            content: `<@${userId}> Your video is ready!`,
             embeds: [
               {
                 title: `Here's your video: ${prompt}`,
-                description: 'Click the link above to view your generated video.',
-                color: 0x00ff00,
+                description: `Click the link to view your generated video. ${result}`,
+                color: 0xff0000,
               },
             ],
           }),
@@ -172,7 +181,8 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
     })
 
     return deferResponse
-  }
+  }  
+  */}
 
   return new Response('Unknown command', { status: 400 })
 }
