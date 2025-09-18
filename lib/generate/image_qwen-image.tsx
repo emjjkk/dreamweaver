@@ -1,6 +1,9 @@
 import { upload } from '@/lib/upload'
 import { InferenceClient } from "@huggingface/inference";
 
+// app/api/generate-node/route.ts
+export const runtime = "nodejs18.x"; // Node function
+
 // Style-specific prompt enhancements
 const stylePrompts = {
     hyperrealistic: "Photorealistic, ultra-detailed, professional photography, sharp focus, perfect lighting, high resolution, lifelike textures, realistic materials, natural colors, depth of field, DSLR quality",
