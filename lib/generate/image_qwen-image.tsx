@@ -27,11 +27,7 @@ export async function generate(prompt: string, user_id: string, style?: string) 
         throw new Error('HF_TOKEN must start with "hf_"')
     }
 
-    // const client = new InferenceClient(process.env.HF_TOKEN);
-    const client = new InferenceClient(process.env.HF_TOKEN, {
-  endpointUrl: "https://api-inference.huggingface.co/models/Qwen/Qwen-Image"
-});
-
+    const client = new InferenceClient(process.env.HF_TOKEN);
 
     try {
         // Build enhanced prompt with style
@@ -49,6 +45,7 @@ export async function generate(prompt: string, user_id: string, style?: string) 
         // The Hugging Face API returns a Blob directly
         const imageBlob = await client.textToImage({
             model: "Qwen/Qwen-Image",
+            provider: "fal-ai",
             inputs: enhancedPrompt,
             parameters: { 
                 num_inference_steps: 8,
