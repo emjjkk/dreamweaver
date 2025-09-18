@@ -47,7 +47,7 @@ export async function generate(prompt: string, user_id: string, style?: string) 
             model: "Qwen/Qwen-Image",
             inputs: enhancedPrompt,
             parameters: { 
-                num_inference_steps: 20,
+                num_inference_steps: 8,
             },
         });
         
