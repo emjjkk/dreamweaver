@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "app/api/**": {
+      "runtime": "edge",
+      "env": ["HF_TOKEN", "DISCORD_PUBLIC_KEY", "SUPABASE_SERVICE_KEY", "HF_TOKEN_2"]
+    }
+  }
+}
