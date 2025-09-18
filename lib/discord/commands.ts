@@ -135,7 +135,7 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
         }
 
         console.log('[status] Calling generateImage function with style:', style)
-        const result = await generateImage(prompt, userId, style)
+        const result = await generateImage(prompt, userId!, style)
         console.log('[status] Image generated successfully:', result)
         console.log('[DEBUG] APP_ID:', APP_ID)
         console.log('[DEBUG] interactionToken length:', interactionToken.length)
