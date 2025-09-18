@@ -3,7 +3,7 @@ import { verifyKey } from 'discord-interactions'
 import { handleCommand } from '@/lib/discord/commands'
 
 // export const runtime = 'edge'
-export const runtime = "nodejs18.x"; // Node function
+export const runtime = "nodejs"; // Node function
 
 const PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY!
 
