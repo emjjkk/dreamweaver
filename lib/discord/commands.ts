@@ -79,7 +79,7 @@ Official Discord: https://discord.gg/xTQ4WRNqyJ
 Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
 
 ### Credits
-- **Bot Developers**: @e.mjjkk, @burnyaaa
+- **Bot Developers**: @e.mjjkk, @burnyaaaa
 - **Qwen-Image Model https://huggingface.co/Qwen/Qwen-Image** : Chenfei Wu, Jiahao Li, Jingren Zhou, Junyang Lin, Kaiyuan Gao, Kun Yan, Sheng-ming Yin, Shuai Bai, Xiao Xu, Yilei Chen, Yuxiang Chen, Zecheng Tang, Zekai Zhang, Zhengyi Wang, An Yang, Bowen Yu, Chen Cheng, Dayiheng Liu, Deqing Li, Hang Zhang, Hao Meng, Hu Wei, Jingyuan Ni, Kai Chen, Kuan Cao, Liang Peng, Lin Qu, Minggang Wu, Peng Wang, Shuting Yu, Tingkun Wen, Wensen Feng, Xiaoxiao Xu, Yi Wang, Yichang Zhang, Yongqiang Zhu, Yujia Wu, Yuxuan Cai, Zenan Liu
 
 `,
@@ -98,13 +98,13 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
                   type: 2, // BUTTON
                   style: 5, // LINK style
                   label: "📚 Repository",
-                  url: "https://github.com/yourusername/dreamweaver", // Replace with your docs/repo
+                  url: "https://github.com/emjjkk/dreamweaver", // Replace with your docs/repo
                 },
                 {
                   type: 2, // BUTTON
                   style: 5, // LINK style
                   label: "🐛 Report Issues",
-                  url: "https://github.com/yourusername/dreamweaver/issues", // Replace with your issues page
+                  url: "https://github.com/emjjkk/dreamweaver/issues", // Replace with your issues page
                 }
               ]
             }
@@ -187,7 +187,7 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
             components: [{
               type: 2,
               style: 5,
-              label: '📥 Download Image',
+              label: 'Download Image',
               url: result,
             }],
           }],
