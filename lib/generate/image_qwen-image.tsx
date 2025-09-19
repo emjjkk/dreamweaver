@@ -54,9 +54,9 @@ export async function generate(prompt: string, user_id: string, style?: string) 
         console.log('[IMG] Step 5: About to call Hugging Face API...')
         console.log('[IMG] API call parameters:', {
             model: "Qwen/Qwen-Image",
-            provider: "fal-ai",
+            provider: "auto",
             promptLength: enhancedPrompt.length,
-            inference_steps: 8
+            inference_steps: 20
         })
         
         // Add timeout to the HF API call
@@ -69,10 +69,10 @@ export async function generate(prompt: string, user_id: string, style?: string) 
         
         const apiPromise = client.textToImage({
             model: "Qwen/Qwen-Image",
-            provider: "fal-ai",
+            provider: "auto",
             inputs: enhancedPrompt,
             parameters: { 
-                num_inference_steps: 8,
+                num_inference_steps: 20,
             },
         })
         
