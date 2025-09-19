@@ -48,7 +48,7 @@ async function main() {
             "name": "style",
             "description": "Choose the art style for your video",
             "type": 3,
-            "required": false,
+            "required": true,
             "choices": [
               {"name": "Hyperrealistic", "value": "hyperrealistic"},
               {"name": "Pop Art", "value": "pop_art"},

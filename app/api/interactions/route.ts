@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyKey } from 'discord-interactions'
 import { handleCommand } from '@/lib/discord/commands'
 
-export const runtime = 'edge'
-export const maxDuration = 60
-// export const runtime = "nodejs"; // Node function
+export const runtime = 'nodejs'
+export const maxDuration = 300
 
 const PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY!
 
