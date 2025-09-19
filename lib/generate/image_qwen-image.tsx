@@ -16,8 +16,8 @@ const stylePrompts = {
 
 export async function generate(prompt: string, user_id: string, style?: string) {
     // Debug environment variables
-    console.log('[DEBUG] HF_TOKEN exists:', !!process.env.HF_TOKEN_2)
-    console.log('[DEBUG] HF_TOKEN length:', process.env.HF_TOKEN_2?.length)
+    console.log('[DEBUG] HF_TOKEN exists:', !!process.env.HF_TOKEN)
+    console.log('[DEBUG] HF_TOKEN length:', process.env.HF_TOKEN?.length)
     
     if (!process.env.HF_TOKEN) {
         throw new Error('HF_TOKEN environment variable is not set')

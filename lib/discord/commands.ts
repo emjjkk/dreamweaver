@@ -118,91 +118,158 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
     const prompt = getStringOption(interaction.data.options, 'prompt')
     const style = getStringOption(interaction.data.options, 'style')
     
-    console.log('[status] Command received...', { prompt, style, userId })
+    console.log('[DEBUG] Environment check:')
+    console.log('[DEBUG] APP_ID:', APP_ID ? 'exists' : 'MISSING')
+    console.log('[DEBUG] HF_TOKEN:', process.env.HF_TOKEN ? 'exists' : 'MISSING')
+    console.log('[DEBUG] HF_TOKEN_2:', process.env.HF_TOKEN_2 ? 'exists' : 'MISSING')
+    
+    console.log('[status] Command received...', { 
+      prompt: prompt?.substring(0, 50), 
+      style, 
+      userId,
+      interactionToken: interactionToken ? 'exists' : 'MISSING'
+    })
+
+    if (!prompt) {
+      return new Response(
+        JSON.stringify({
+          type: 4,
+          data: {
+            content: '❌ Please provide a prompt for image generation.',
+            flags: 64
+          },
+        }),
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+    }
 
     // Return deferred response immediately
     const deferResponse = new Response(
-      JSON.stringify({ type: 5 }), // DEFERRED_RESPONSE
+      JSON.stringify({ type: 5 }),
       { headers: { 'Content-Type': 'application/json' } }
     )
 
-    // Handle the async operation without blocking the response
-    Promise.resolve().then(async () => {
-      try {
-        console.log('[status] Starting image generation...')
-
-        if (!prompt) {
-          throw new Error('No prompt provided')
-        }
-
-        console.log('[status] Calling generateImage function with style:', style)
-        const result = await generateImage(prompt, userId!, style)
-        console.log('[status] Image generated successfully:', result)
-        console.log('[DEBUG] APP_ID:', APP_ID)
-        console.log('[DEBUG] interactionToken length:', interactionToken.length)
-
-        // Try using the /messages/@original endpoint for deferred responses
-        const webhookUrl = `https://discord.com/api/v10/webhooks/${APP_ID}/${interactionToken}/messages/@original`
-        console.log('[DEBUG] Webhook URL:', webhookUrl)
-
-        // Create embed title with style info
-        const embedTitle = style 
-          ? `Here's your ${style.replace('_', ' ')} style image: ${prompt}`
-          : `Here's your image: ${prompt}`
-
-        const webhookResponse = await fetch(webhookUrl, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            content: `<@${userId}> Your image is ready!`,
-            embeds: [
-              {
-                title: embedTitle,
-                image: { url: result },
-                color: 0xffffff,
-                footer: style ? { text: `Style: ${style.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}` } : undefined,
-              },
-            ],
-            components: [
-              {
-                type: 1, // ACTION_ROW
-                components: [
-                  {
-                    type: 2, // BUTTON
-                    style: 5, // LINK style
-                    label: '📥 Download Image',
-                    url: result,
-                  },
-                ],
-              },
-            ],
-          }),
-        })
-
-        console.log('[status] Discord webhook response status:', webhookResponse.status)
-
-        if (!webhookResponse.ok) {
-          const errorText = await webhookResponse.text()
-          console.error('[ERROR] Discord webhook failed:', errorText)
-          throw new Error(`Discord webhook failed: ${webhookResponse.status} - ${errorText}`)
-        }
-
-        console.log('[status] Discord message sent successfully')
-      } catch (err) {
-        console.error('[ERROR] Image generation failed:', err)
-        await fetch(`https://discord.com/api/v10/webhooks/${APP_ID}/${interactionToken}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `<@${userId}> ❌ Failed to generate image. Error: ${err instanceof Error ? err.message : 'Unknown error'}`,
-          }),
-        })
-      }
-    })
+    // Use a more robust async handler
+    handleImageGenerationAsync(prompt, style, userId!, interactionToken, APP_ID!)
+      .catch(err => {
+        console.error('[CRITICAL] Unhandled error in async handler:', err)
+      })
 
     return deferResponse
+  }
+
+  return new Response('Unknown command', { status: 400 })
+}
+
+async function handleImageGenerationAsync(
+  prompt: string,
+  style: string | undefined,
+  userId: string,
+  interactionToken: string,
+  appId: string
+) {
+  let step = 'initialization'
+  
+  try {
+    console.log('[ASYNC] Step 1: Starting image generation async handler')
+    step = 'image_generation_start'
+    
+    console.log('[ASYNC] Step 2: About to call generateImage')
+    const result = await generateImage(prompt, userId, style)
+    step = 'image_generation_complete'
+    
+    console.log('[ASYNC] Step 3: Image generated successfully:', typeof result, result?.substring(0, 100))
+    step = 'webhook_preparation'
+    
+    if (!result || typeof result !== 'string') {
+      throw new Error(`Invalid result from generateImage: ${typeof result}`)
+    }
+
+    // Test webhook URL construction
+    const webhookUrl = `https://discord.com/api/v10/webhooks/${appId}/${interactionToken}/messages/@original`
+    console.log('[ASYNC] Step 4: Webhook URL constructed:', webhookUrl.substring(0, 50) + '...')
+    step = 'webhook_call'
+
+    const embedTitle = style 
+      ? `Here's your ${style.replace('_', ' ')} style image`
+      : `Here's your image`
+
+    console.log('[ASYNC] Step 5: About to call Discord webhook')
+    
+    const webhookResponse = await fetch(webhookUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Dreamweaver Bot'
+      },
+      body: JSON.stringify({
+        content: `<@${userId}> Your image is ready!`,
+        embeds: [
+          {
+            title: `${embedTitle}: ${prompt.substring(0, 100)}`,
+            image: { url: result },
+            color: 0x00ff00,
+            footer: style ? { 
+              text: `Style: ${style.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}` 
+            } : { text: 'Generated by Dreamweaver' },
+          },
+        ],
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 2,
+                style: 5,
+                label: '📥 Download Image',
+                url: result,
+              },
+            ],
+          },
+        ],
+      }),
+    })
+
+    step = 'webhook_response'
+    console.log('[ASYNC] Step 6: Discord webhook response status:', webhookResponse.status)
+    
+    if (!webhookResponse.ok) {
+      const errorText = await webhookResponse.text()
+      console.error('[ASYNC] Discord webhook failed:')
+      console.error('[ASYNC] Status:', webhookResponse.status)
+      console.error('[ASYNC] Response:', errorText)
+      throw new Error(`Discord webhook failed: ${webhookResponse.status}`)
+    } else {
+      console.log('[ASYNC] Step 7: SUCCESS! Image sent to Discord')
+      
+      // Also log the response to make sure it worked
+      const responseText = await webhookResponse.text()
+      console.log('[ASYNC] Discord response:', responseText.substring(0, 200))
+    }
+
+  } catch (err) {
+    console.error(`[ASYNC] ERROR at step ${step}:`, err)
+    console.error('[ASYNC] Error details:', {
+      message: err instanceof Error ? err.message : 'Unknown error',
+      stack: err instanceof Error ? err.stack : 'No stack trace'
+    })
+    
+    // Try to send error message to Discord
+    try {
+      console.log('[ASYNC] Attempting to send error message to Discord')
+      const errorWebhookUrl = `https://discord.com/api/v10/webhooks/${appId}/${interactionToken}/messages/@original`
+      
+      await fetch(errorWebhookUrl, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `<@${userId}> ❌ Failed to generate image at step: ${step}. Error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+        }),
+      })
+      console.log('[ASYNC] Error message sent to Discord')
+    } catch (webhookErr) {
+      console.error('[ASYNC] Failed to send error message to Discord:', webhookErr)
+    }
   }
 
   {/* 
