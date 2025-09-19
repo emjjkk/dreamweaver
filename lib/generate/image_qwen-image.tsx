@@ -15,19 +15,28 @@ const stylePrompts = {
 };
 
 export async function generate(prompt: string, user_id: string, style?: string) {
-    // Debug environment variables
-    console.log('[DEBUG] HF_TOKEN exists:', !!process.env.HF_TOKEN)
-    console.log('[DEBUG] HF_TOKEN length:', process.env.HF_TOKEN?.length)
+    // Fix the environment variable inconsistency
+    const hfToken = process.env.HF_TOKEN || process.env.HF_TOKEN_2;
     
-    if (!process.env.HF_TOKEN) {
-        throw new Error('HF_TOKEN environment variable is not set')
+    console.log('[IMG] Step 1: Environment variables check')
+    console.log('[IMG] HF_TOKEN exists:', !!process.env.HF_TOKEN)
+    console.log('[IMG] HF_TOKEN_2 exists:', !!process.env.HF_TOKEN_2)
+    console.log('[IMG] Using token:', hfToken ? 'found' : 'MISSING')
+    console.log('[IMG] Token length:', hfToken?.length)
+    console.log('[IMG] Token starts with hf_:', hfToken?.startsWith('hf_'))
+    
+    if (!hfToken) {
+        console.error('[IMG] ERROR: No HF token found')
+        throw new Error('Neither HF_TOKEN nor HF_TOKEN_2 environment variable is set')
     }
 
-    if (!process.env.HF_TOKEN.startsWith('hf_')) {
+    if (!hfToken.startsWith('hf_')) {
+        console.error('[IMG] ERROR: Invalid HF token format')
         throw new Error('HF_TOKEN must start with "hf_"')
     }
 
-    const client = new InferenceClient(process.env.HF_TOKEN);
+    console.log('[IMG] Step 2: Creating Hugging Face client')
+    const client = new InferenceClient(hfToken);
 
     try {
         // Build enhanced prompt with style
@@ -39,29 +48,80 @@ export async function generate(prompt: string, user_id: string, style?: string) 
             enhancedPrompt = `${enhancedPrompt}. ${styleEnhancement}`;
         }
         
-        console.log('[status] Starting image generation with enhanced prompt:', enhancedPrompt)
-        console.log('[status] Style applied:', style || 'none')
+        console.log('[IMG] Step 3: Enhanced prompt created (length:', enhancedPrompt.length, ')')
+        console.log('[IMG] Step 4: Style applied:', style || 'none')
         
-        // The Hugging Face API returns a Blob directly
-        const imageBlob = await client.textToImage({
+        console.log('[IMG] Step 5: About to call Hugging Face API...')
+        console.log('[IMG] API call parameters:', {
+            model: "Qwen/Qwen-Image",
+            provider: "fal-ai",
+            promptLength: enhancedPrompt.length,
+            inference_steps: 8
+        })
+        
+        // Add timeout to the HF API call
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+                console.error('[IMG] TIMEOUT: Hugging Face API call timed out after 60 seconds')
+                reject(new Error('Hugging Face API call timed out after 60 seconds'))
+            }, 60000)
+        })
+        
+        const apiPromise = client.textToImage({
             model: "Qwen/Qwen-Image",
             provider: "fal-ai",
             inputs: enhancedPrompt,
             parameters: { 
                 num_inference_steps: 8,
             },
-        });
+        })
         
-        console.log('[status] Image generated! Type:', typeof imageBlob)
-        console.log('[status] Uploading...')
+        console.log('[IMG] Step 6: Waiting for API response (with 60s timeout)...')
+        const imageBlob = await Promise.race([apiPromise, timeoutPromise])
         
-        // imageBlob is already a Blob, no need to convert
-        const response = await upload(user_id, imageBlob, "image");
+        console.log('[IMG] Step 7: API response received!')
+        console.log('[IMG] Response type:', typeof imageBlob)
         
-        console.log('[status] Upload response:', response)
-        return response
+        if (!imageBlob) {
+            console.error('[IMG] ERROR: API returned null/undefined')
+            throw new Error('Hugging Face API returned null or undefined')
+        }
+        
+        
+        console.log('[IMG] Step 8: Starting upload process...')
+        
+        const uploadResult = await upload(user_id, imageBlob, "image");
+        
+        console.log('[IMG] Step 9: Upload completed')
+        console.log('[IMG] Upload result type:', typeof uploadResult)
+        console.log('[IMG] Upload result preview:', typeof uploadResult === 'string' ? uploadResult.substring(0, 100) + '...' : uploadResult)
+        
+        if (!uploadResult) {
+            console.error('[IMG] ERROR: Upload returned null/undefined')
+            throw new Error('Upload function returned null or undefined')
+        }
+        
+        if (typeof uploadResult !== 'string') {
+            console.error('[IMG] ERROR: Upload returned non-string:', typeof uploadResult)
+            throw new Error(`Expected string URL from upload, got ${typeof uploadResult}`)
+        }
+        
+        console.log('[IMG] Step 10: SUCCESS! Final URL generated')
+        return uploadResult
+        
     } catch (error) {
-        console.error('[ERROR] Detailed error:', error)
+        console.error('[IMG] CRITICAL ERROR occurred:')
+        console.error('[IMG] Error type:', typeof error)
+        console.error('[IMG] Error instanceof Error:', error instanceof Error)
+        console.error('[IMG] Error message:', error instanceof Error ? error.message : String(error))
+        console.error('[IMG] Error stack:', error instanceof Error ? error.stack : 'No stack trace available')
+        
+        // Additional error details for debugging
+        if (error && typeof error === 'object') {
+            console.error('[IMG] Error object keys:', Object.keys(error))
+            console.error('[IMG] Error object:', JSON.stringify(error, null, 2))
+        }
+        
         throw error
     }
 }
