@@ -35,6 +35,10 @@ async function main() {
         description: 'Info about the things that keep Dreamweaver running',
       },
       {
+        name: 'profile',
+        description: 'Check your credit balance and more',
+      },
+      {
         name: 'dream',
         description: 'Generate a image from text prompt.',
         options: [

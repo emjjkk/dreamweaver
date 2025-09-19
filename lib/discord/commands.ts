@@ -1,5 +1,5 @@
 import { generate as generateImage } from '@/lib/generate/image_qwen-image'
-import { generate as generateVideo } from '@/lib/generate/video_wan2-2'
+import { supabase } from '@/lib/supabase/bot'
 import { checkUser } from '@/lib/user'
 
 import type {
@@ -27,6 +27,9 @@ export async function handleCommand(interaction: APIChatInputApplicationCommandI
   const { name } = interaction.data
   const { id: interactionId, token: interactionToken, member } = interaction
   const userId = interaction.member?.user?.id || interaction.user?.id
+  const avatarHash = interaction.member?.user?.avatar || interaction.user?.avatar
+  const avatarUrl = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.png`
+  const displayName = interaction.member?.user?.global_name || interaction.user?.global_name
 
   if (name === 'ping') {
     return new Response(
@@ -196,6 +199,19 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
 
       console.log('[HANDLER] Image generated, sending to Discord')
 
+      const { data, error } = await supabase
+        .from('generations')
+        .insert([
+          {
+            user_id: userId,
+            data: {
+              "prompt": prompt,
+              "image": result
+            }
+          },
+        ])
+        .select()
+
       const embedTitle = style
         ? `Here's your ${style.replace('_', ' ')} style image`
         : `Here's your image`
@@ -259,8 +275,7 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `<@${userId}> ❌ Failed to generate image. Error: ${error instanceof Error ? error.message : 'Unknown error'
-              }`,
+            content: `<@${userId}> ❌ Failed to generate image. It's not your fault. Please try again later.`,
           }),
         })
       } catch (webhookError) {
@@ -270,6 +285,74 @@ Simply use \`/dream [your prompt]\` to generate amazing AI artwork!
       return new Response('Error handled', { status: 200 })
     }
   }
+
+  if (name === 'profile') {
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('discord_id', userId)
+      .single()
+
+    const { data: user_generations, error: fetchError2 } = await supabase
+      .from('generations')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false }) // latest first
+      .limit(5) // only last 5
+
+    if (!user) {
+      console.error('[checkUser] Fetch error:', fetchError)
+      return new Response(
+        JSON.stringify({
+          type: 4,
+          data: {
+            content: `:shaking_face: We don’t have any information about you. Try generating an image to get started.`,
+          },
+        }),
+        { headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const generationsList = user_generations?.length
+      ? user_generations.map(g => {
+        const genData = g.data; // already JSON from Supabase
+        return `- **${genData.prompt}**\n${genData.image}`; // prompt + image URL
+      }).join('\n\n')
+      : '_None yet_';
+
+    return new Response(
+      JSON.stringify({
+        type: 4,
+        data: {
+          embeds: [
+            {
+              thumbnail: { url: avatarUrl },
+              title: `${displayName}'s Profile`,
+              description: `
+**💷 Credit Balance**: ${user.credit_balance}
+**🖼️ Recently Generated Images**: 
+${generationsList}`,
+            },
+          ],
+          components: [
+            {
+              type: 1, // ACTION_ROW
+              components: [
+                {
+                  type: 2, // BUTTON
+                  style: 5, // LINK style
+                  label: "Buy Credits",
+                  url: "https://dreamweaverdiscord.vercel.app/buy-credits", // Replace with your docs/repo
+                }
+              ]
+            }
+          ]
+        },
+      }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+
 
   return new Response('Unknown command', { status: 400 })
 }
