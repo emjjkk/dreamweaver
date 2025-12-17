@@ -1,3 +1,7 @@
+### This bot no longer works because of changes to pricing plans on the API provider.
+Maybe I'll upgrade to pro in the future but for now this bot is dead.
+
+
 ## Dreamweaver: Near perfect AI images and artwork. Instantly. Open-source. On Discord.
 
 Website: https://dreamweaverdiscord.vercel.app
