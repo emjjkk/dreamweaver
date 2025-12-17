@@ -1,10 +1,7 @@
 ### This bot no longer works because of changes to pricing plans on the API provider.
 Maybe I'll upgrade to pro in the future but for now this bot is dead.
 
-Website: https://dreamweaverdiscord.vercel.app
-
-Official Discord: https://discord.gg/xTQ4WRNqyJ
-
+<img width="640" height="305" alt="image" src="https://github.com/user-attachments/assets/1c491660-4a6b-40c8-b78b-1130ea1bbdf1" />
 
 ### Getting Started
 
